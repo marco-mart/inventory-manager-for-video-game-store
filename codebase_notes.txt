@@ -1,0 +1,168 @@
+Deployment And Development
+--------------------------
+When developing go to "resources" folder and set value in
+application.properties file "development" or "production".
+
+
+Starting Project Using Maven
+----------------------------
+Run using: mvn spring-boot:run
+mvn -e spring-boot:run for stack trace
+
+Rebuild Project with Maven
+--------------------------
+mvn clean install
+
+
+Docker Notes
+--------------------------------------------------------------------------
+'docker port container_name_or_id'
+	- to see container port mappings.
+'docker inspect container_name_or_id'
+	- for detailed info about the container, including network settings.
+'docker --help' to see usage.
+'pull' download an image from a registry.
+
+'docker run [options] IMAGE [command] [arg...]'
+
+How to check environment variables:
+-----------------------------------
+docker exec container_name
+docker inspect container_name
+
+How to check running containers:
+--------------------------------
+docker ps              -- defaults to just runnning containers
+docker ps -a           -- to show all containers
+
+How to create a new container:
+------------------------------
+'docker run' create and run a new containers from an image.
+
+
+Use SpringBoot Docker to create an image for your project:
+----------------------------------------------------------
+Go to project's (app's) base directory where pom.xml is.
+sudo /path/to/mvn spring-boot:build-image
+
+** You gotta use full path to mvn as sudo because sudo doesn't have 'mvn'
+** executable in its path.
+
+*** To find full path you can use: "which mvn"
+
+Add the -DskipTests to skip the tests:
+--------------------------------------
+sudo /path/to/mvn spring-boot:build-image -DskipTests
+
+
+
+Setup MySQL Docker image
+------------------------
+Pull the MySQL Docker image using "docker pull mysql:latest"
+
+Run the following command:
+docker run -e MYSQL_ROOT_PASSWORD=<password> -p 3306:3306 --name mysql_local -d mysql:latest
+
+'-d' Run container in the background and print container ID.
+'-e' Used to set environment variable
+'-p' Used to publish a container's port(s) to the host.
+	 - PORTS ARE JUST FILES! THEY ARE NOT PHYSICAL THINGS. THEY ARE 'LOGICAL CONSTRUCTS'
+	 - Basically, you are defining a mapping of the container's port to the host's port.
+	 - Usage: 'host_port:container_port'
+	 - Container's ports are similar to those of an OS.
+	 	- Containers have a full range of ports available to them.
+	 - To list all ports being used, use 'ss tuln'
+	 	- Ports not listed are free to use.
+	 - To check a specific port: 'sudo lsof -i :[port_number]'
+'--name' assign a name to the container.
+
+This creates a new MySQL image. (The running instance of the image is called
+a 'container' which is isolated environment.)
+
+MySQL Container Environment Vars
+--------------------------------
+MYSQL_ROOT_PASSWORD
+MYSQL_DATABASE
+MYSQL_USER
+MYSQL_PASSWORD
+MYSQL_ALLOW_EMPTY_PASSWORD
+MYSQL_RANDOM_ROOT_PASSWORD
+MYSQL_ONETIME_PASSWORD
+MYSQL_INITDB_SKIP_TZINFO
+
+
+Setup service container
+-----------------------
+Same as setting up MySQL container pretty much.
+
+ex creating auth_server container:
+ sudo docker run -p 7070:7070 --name auth_service -d authorization-service:0.0.1-SNAPSHOT
+ 
+ex creating gamestore_server container:
+ sudo docker run -p 8080:8080 --name game_store_service -d gamestore:0.0.1-SNAPSHOT
+ 
+ 
+ 
+ 
+Container-to-Container Networking
+---------------------------------
+To have servers inside of containers talk to eachother, first we must create a Docker network.
+
+- Use a "User-defined bridge" network because it provides:
+
+    - Isolation: User-defined bridge networks provide better isolation between containers compared to the default bridge network. This enhances security.
+
+    - DNS Resolution: User-defined bridge networks enable automatic DNS resolution of container names to their respective IP addresses, facilitating easier inter-container communication.
+
+    - Simplicity: For single-host deployments, bridge networks are simple to set up and manage, making them ideal for straightforward scenarios like connecting databases and REST APIs.
+
+To create a user-defined bridge network:
+----------------------------------------
+1. sudo docker network create -d bridge GAME_STORE_NETWORK
+
+To run a container in the created network:
+------------------------------------------
+1. sudo docker run --network=my-net -itd --name=container3 busybox
+    
+
+
+
+
+
+How to connect SpringBoot service CONTAINER to MySQL CONTAINER
+--------------------------------------------------------------
+In the SpringBoot service 'resources' folder
+In the 'development' or 'production' file
+For the data source do: "spring.datasource.url=jdbc:mysql://<container_name>:<port_number>"
+
+For example: "spring.datasource.url=jdbc:mysql://mysql_local_game_store:3306?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+
+
+How to connect client cli to local MySQL server
+-----------------------------------------------
+mysql -h <host_name> -P <port_number> -u <user_name> -p <db_name>
+
+localhost=127.0.0.1
+db_name=game_store
+
+-h    -- connect to the MySQL server on the given host.
+-u       -- the user name of the MySQL accound to use for connecting to the server
+-p       -- prompts server to ask for one.
+-P       -- the port number to use.
+
+Example usage:
+mysql -h 127.0.0.1 -P 3306 -u root -p game_store
+
+
+Connect DBeaver client to local MySQL server
+--------------------------------------------
+Make sure MySQL server is up and running.
+
+Open DBeaver.
+Add new connection.
+Driver properties --> allowPublicKeyRetrieval 'true'
+Main
+Add port
+User and pass
+Test connection
+
