@@ -14,7 +14,11 @@ if [ $exit_status -eq 0 ]; then
     # Continue with further commands or scripts
 else
     echo "Error: One or both databases are down."
-    # Handle the error, stop the script, or run recovery actions
+    echo "Starting servers..."
+    ./start_database_servers.sh
+
+    # Wait 5 seconds for servers to start.
+    sleep 5
 fi
 
 # Start auth_service.
@@ -52,8 +56,9 @@ if curl -s http://localhost:7070/ > /dev/null; then
     echo "authorization service is up."
 else
     echo "authorization service is not responding."
-    kill -KILL $gamestore_pid
-    kill -KILL $auth_pid
+    echo "EXITING..."
+    kill $gamestore_pid
+    kill $auth_pid
     exit 1
 fi
 
@@ -62,8 +67,9 @@ if curl -s http://localhost:8080/ > /dev/null; then
     echo "gamestore service is up."
 else
     echo "gamestore service is not responding."
-    kill -KILL $gamestore_pid
-    kill -KILL $auth_pid
+    echo "EXITING..."
+    kill $gamestore_pid
+    kill $auth_pid
     exit 1
 fi
 
