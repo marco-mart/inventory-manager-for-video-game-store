@@ -3,37 +3,17 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "web-interface": {
+    "landing-page-interface": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "inlineTemplate": true,
-          "inlineStyle": true,
-          "skipTests": true,
           "standalone": false
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
         },
         "@schematics/angular:directive": {
-          "skipTests": true,
           "standalone": false
-        },
-        "@schematics/angular:guard": {
-          "skipTests": true
-        },
-        "@schematics/angular:interceptor": {
-          "skipTests": true
         },
         "@schematics/angular:pipe": {
-          "skipTests": true,
           "standalone": false
-        },
-        "@schematics/angular:resolver": {
-          "skipTests": true
-        },
-        "@schematics/angular:service": {
-          "skipTests": true
         }
       },
       "root": "",
@@ -43,7 +23,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/web-interface",
+            "outputPath": "dist/landing-page-interface",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -87,10 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "web-interface:build:production"
+              "buildTarget": "landing-page-interface:build:production"
             },
             "development": {
-              "buildTarget": "web-interface:build:development"
+              "buildTarget": "landing-page-interface:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -98,7 +78,26 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "web-interface:build"
+            "buildTarget": "landing-page-interface:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": [],
+            "karmaConfig": "karma.conf.js"
           }
         }
       }
